@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -44,11 +45,15 @@ public class TeleOpROSE extends LinearOpMode {
     public DcMotor  rightFront  = null;
     public DcMotor  leftBack    = null;
     public DcMotor  rightBack   = null;
-    public DcMotor  mArm = null;
-    public DcMotor  mLS  = null;
-    public Servo Intake  = null;
+    public DcMotor  arm = null;
+    public DcMotor  extension  = null;
+    public Servo Pitch   = null;
+    public Servo munch   = null;
+    public Servo Yaw     = null;
 
-    double intakeOffset = 0;
+    double pitchOffset = -1;
+    double munchOffset = -1;
+    double yawOffset = -1;
 
 
     @Override
@@ -62,33 +67,38 @@ public class TeleOpROSE extends LinearOpMode {
         double turn;
         double maxBack;
         double maxFront;
-        double mArmPower;
-        double mLSPower;
+        double armPower;
+        double extensionPower;
+        //double deMunchified = 0;
 
         leftFront  = hardwareMap.get(DcMotor.class, "leftFront");
         rightFront  = hardwareMap.get(DcMotor.class, "rightFront");
         leftBack  = hardwareMap.get(DcMotor.class, "leftBack");
         rightBack  = hardwareMap.get(DcMotor.class, "rightBack");
-        mArm = hardwareMap.get(DcMotor.class, "mArm");
-        mLS  = hardwareMap.get(DcMotor.class, "mLS");
+        arm = hardwareMap.get(DcMotor.class, "arm");
+        extension  = hardwareMap.get(DcMotor.class, "extension");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
-        mArm.setDirection(DcMotor.Direction.REVERSE);
-        mLS.setDirection(DcMotor.Direction.REVERSE);
+        arm.setDirection(DcMotor.Direction.REVERSE);
+        extension.setDirection(DcMotor.Direction.REVERSE);
 
-        mArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mLS.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         
-        mArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        mLS.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        mArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        Intake  = hardwareMap.get(Servo.class, "Intake");
-        Intake.setPosition(0.5);
+        Pitch  = hardwareMap.get(Servo.class, "Pitch");
+        //Pitch.setPosition(1);
+        munch  = hardwareMap.get(Servo.class, "munch");
+        //Munch.setPosition(0);
+        Yaw  = hardwareMap.get(Servo.class, "Yaw");
+        //Yaw.setPosition(1.5);
 
         telemetry.addData(">", "Robot Ready.  Press START.");
         telemetry.update();
@@ -130,40 +140,40 @@ public class TeleOpROSE extends LinearOpMode {
 
 
 // Arm - up (Y), down (A)
-            mArmPower = gamepad2.left_stick_y/1.5;
+            armPower = gamepad2.left_stick_y/1.5;
 
-            if (mArmPower > 1.0)
-                mArmPower   /= mArmPower;
+            if (armPower > 1.0)
+                armPower   /= armPower;
 
-            mArm.setPower(mArmPower);
+            arm.setPower(armPower);
 
 
     // Arm lower limit -------------------------------------------
-//            if (mArm.getCurrentPosition() < 10) {
-//                mArm.setTargetPosition(10);
-//                mArm.setPower(0.3);
+//            if (arm.getCurrentPosition() < 10) {
+//                arm.setTargetPosition(10);
+//                arm.setPower(0.3);
 //            }
-//            else if (mArm.getCurrentPosition() < 5) {
-//                mArm.setPower(0);
+//            else if (arm.getCurrentPosition() < 5) {
+//                arm.setPower(0);
 //            }
 
     // Arm upper limit --------------------------------------------
-//            if (mArm.getCurrentPosition() > 7130) {
-//                mArm.setTargetPosition(7130);
-//                mArm.setPower(-0.3);
+//            if (arm.getCurrentPosition() > 7130) {
+//                arm.setTargetPosition(7130);
+//                arm.setPower(-0.3);
 //            }
-//            else if (mArm.getCurrentPosition() > 7140) {
-//                mArm.setPower(0);
+//            else if (arm.getCurrentPosition() > 7140) {
+//                arm.setPower(0);
 //            }
 
 
 // Linear Slide - up (dpad up), down (dpad down), zero position (x)
-            mLSPower = -gamepad2.right_stick_y;
+            extensionPower = -gamepad2.right_stick_y;
 
-            if (mLSPower > 1.0)
-                mLSPower   /= mLSPower;
+            if (extensionPower > 1.0)
+                extensionPower   /= extensionPower;
 
-            mLS.setPower(mLSPower);
+            extension.setPower(extensionPower);
 
     // Linear slide power decreases as position gets higher -------------------------
 //            if (mLS.getCurrentPosition() > a && mLSPower > 0)
@@ -195,20 +205,32 @@ public class TeleOpROSE extends LinearOpMode {
 //                mLS.setPower(0);
 
 
-//Intake - out (left bumper), in (right bumpers) --------------------------
-            if (gamepad2.right_bumper)
-                intakeOffset += 0.2;
-            else if (gamepad2.left_bumper)
-                intakeOffset -= 0.2;
-            else
-                intakeOffset = 0;
+//Munch - open (left bumper), close (right bumpers) --------------------------
+            if (gamepad2.left_bumper)
+                munchOffset += 0.2;
+            else if (gamepad2.right_bumper)
+                munchOffset -= 0.2;
+            //else
+            //    munchOffset = 0;
 
-            intakeOffset = Range.clip(intakeOffset, -0.5, 0.5);
-            Intake.setPosition(0.5 + intakeOffset);
+            munchOffset = Range.clip(munchOffset, -0.5, 0.5);
+            munch.setPosition(0.5 + munchOffset);
+
+//Yaw -  left (left bumper), right (right bumpers)--------------------------
+            yawOffset += (gamepad2.left_trigger - gamepad2.right_trigger)/100;
+
+            yawOffset = Range.clip(yawOffset, 0.6, 0.93);
+            Yaw.setPosition(yawOffset);
+
+//Pitch - left (left bumper), right (right bumpers)--------------------------
+            pitchOffset += (gamepad1.left_trigger - gamepad1.right_trigger)/100;
+
+            pitchOffset = Range.clip(pitchOffset, 0.25, 2);
+            Pitch.setPosition(pitchOffset);
 
 
 // Send telemetry message to signify robot running;
-            telemetry.addData("intake pos",  "Offset = %.2f", intakeOffset);
+            //telemetry.addData("intake pos",  "Offset = %.2f", intakeOffset);
 
             telemetry.addData("front left power",  "%.2f", frontLeft);
             telemetry.addData("fl pow", "%.2f", leftFront.getPower());
@@ -219,10 +241,15 @@ public class TeleOpROSE extends LinearOpMode {
             telemetry.addData("back right power", "%.2f", backRight);
             telemetry.addData("br pow", "%.2f", rightBack.getPower());
 
-            telemetry.addData("arm power",  "%.2f", mArmPower);
-            telemetry.addData("linear power", "%.2f", mLSPower);
-            telemetry.addData("arm pos", mArm.getCurrentPosition());
-            telemetry.addData("linear pos", mLS.getCurrentPosition());
+            telemetry.addData("arm power",  "%.2f", armPower);
+            telemetry.addData("linear power", "%.2f", extensionPower);
+            telemetry.addData("arm pos", arm.getCurrentPosition());
+            telemetry.addData("linear pos", extension.getCurrentPosition());
+
+            telemetry.addData("munch pos",  "Offset = %.2f", munchOffset);
+            telemetry.addData("pitch pos",  "Offset = %.2f", pitchOffset);
+            telemetry.addData("yaw pos",  "Offset = %.2f", yawOffset);
+
             telemetry.update();
 
         }
