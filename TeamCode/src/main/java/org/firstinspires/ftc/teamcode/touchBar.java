@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
@@ -23,10 +22,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Config
-@Autonomous(name = "AutoBasketV2", group = "Autonomous")
-public class AutoBasketV2 extends LinearOpMode {
+@Autonomous(name = "touchBar", group = "Autonomous")
+public class touchBar extends LinearOpMode {
 
-// extension class
+    // extension class
     public class Extension {
         private final DcMotorEx extension;
 
@@ -34,8 +33,7 @@ public class AutoBasketV2 extends LinearOpMode {
             extension = hardwareMap.get(DcMotorEx.class, "extension");
             extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             extension.setDirection(DcMotorSimple.Direction.REVERSE);
-            extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//            extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
 
         public class ExtensionUp implements Action {
@@ -50,8 +48,8 @@ public class AutoBasketV2 extends LinearOpMode {
 
                 double pos = extension.getCurrentPosition();
                 packet.put("extensionPos", pos);
-//                telemetry.addData("linear pos", extension.getCurrentPosition());
-//                telemetry.update();
+                telemetry.addData("linear pos", extension.getCurrentPosition());
+                telemetry.update();
                 if (pos < 2000)
                     return true;
                 else {
@@ -95,7 +93,7 @@ public class AutoBasketV2 extends LinearOpMode {
 
 
 
-// arm class
+    // arm class
     public class Arm {
         private final DcMotorEx arm;
 
@@ -103,8 +101,7 @@ public class AutoBasketV2 extends LinearOpMode {
             arm = hardwareMap.get(DcMotorEx.class, "arm");
             arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             arm.setDirection(DcMotorSimple.Direction.FORWARD);
-            arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//            arm.setMode(DcMotor.RunMode.RESET_ENCODERS);
         }
 
 
@@ -122,7 +119,8 @@ public class AutoBasketV2 extends LinearOpMode {
                 packet.put("armPos", pos);
                 telemetry.addData("arm pos", arm.getCurrentPosition());
                 telemetry.update();
-                if (pos < 3200)
+//                if (pos < 3000)
+                if (pos < 500)
                     return true;
                 else {
                     arm.setPower(0);
@@ -131,43 +129,43 @@ public class AutoBasketV2 extends LinearOpMode {
             }
         }
 
-        public ArmUp armUp() {
+        public Action armUp() {
             return new ArmUp();
         }
 
 
         public class ArmDown implements Action {
-                private boolean initialized = false;
+            private boolean initialized = false;
 
-                @Override
-                public boolean run(@NonNull TelemetryPacket packet) {
-                    if (!initialized) {
-                        arm.setPower(-0.4);
-                        initialized = true;
-                    }
-
-                    double pos = arm.getCurrentPosition();
-                    packet.put("armPos", pos);
-                    //telemetry.addData("arm pos", arm.getCurrentPosition());
-                    //telemetry.update();
-                    if (pos > 200)
-                        return true;
-                    else {
-                        arm.setPower(0);
-                        return false;
-                    }
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    arm.setPower(-0.4);
+                    initialized = true;
                 }
-            }
 
-            public Action armDown() {
-                return new ArmDown();
+                double pos = arm.getCurrentPosition();
+                packet.put("armPos", pos);
+                //telemetry.addData("arm pos", arm.getCurrentPosition());
+                //telemetry.update();
+                if (pos > 200)
+                    return true;
+                else {
+                    arm.setPower(0);
+                    return false;
+                }
             }
         }
 
+        public Action armDown() {
+            return new ArmDown();
+        }
+    }
 
 
 
-// munch class
+
+    // munch class
     public static class Munch {
         private final Servo munch;
 
@@ -205,7 +203,7 @@ public class AutoBasketV2 extends LinearOpMode {
 
 
 
-// yaw class
+    // yaw class
     public static class Yaw {
         private final Servo yaw;
 
@@ -285,11 +283,11 @@ public class AutoBasketV2 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Pose2d initialPose = new Pose2d(24, -60, Math.toRadians(90));
-        Pose2d basketPose = new Pose2d(-55, -55, Math.toRadians(225));
-        Pose2d farPose = new Pose2d(-36, -24, Math.toRadians(180));
-        Pose2d mediumPose = new Pose2d(-48, -24, Math.toRadians(180));
-        Pose2d closePose = new Pose2d(-60, -24, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(-24, -60, Math.toRadians(90));
+//        Pose2d basketPose = new Pose2d(-55, -55, Math.toRadians(225));
+//        Pose2d farPose = new Pose2d(-36, -24, Math.toRadians(180));
+//        Pose2d mediumPose = new Pose2d(-48, -24, Math.toRadians(180));
+//        Pose2d closePose = new Pose2d(-60, -24, Math.toRadians(180));
         Pose2d initialPoseRight = new Pose2d(0, -60, Math.toRadians(90));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
@@ -300,41 +298,41 @@ public class AutoBasketV2 extends LinearOpMode {
         Pitch pitch = new Pitch(hardwareMap);
 
 
-        TrajectoryActionBuilder toBasketInit = drive.actionBuilder(initialPose)
-// to basket from init
-                .strafeTo(new Vector2d(-15, -60))
-                .turn(Math.toRadians(135));
+//        TrajectoryActionBuilder toBasketInit = drive.actionBuilder(initialPose)
+//// to basket from init
+//                .strafeTo(new Vector2d(-50, -50))
+//                .turn(Math.toRadians(135))
 //                .strafeTo(new Vector2d(-55, -55));
-//                .strafeTo(new Vector2d(56, -60));
-        TrajectoryActionBuilder toFar = drive.actionBuilder(basketPose)
-// to far sample from basket
-                .strafeTo(new Vector2d(-36, -24))
-                .turn(Math.toRadians(-45));
-
-        TrajectoryActionBuilder toBasketFar = drive.actionBuilder(farPose)
-// to basket from far
-                .strafeTo(new Vector2d(-55, -55))
-                .turn(Math.toRadians(45));
-
-        TrajectoryActionBuilder toMedium = drive.actionBuilder(basketPose)
-// to medium sample from basket
-                .strafeTo(new Vector2d(-48, -24))
-                .turn(Math.toRadians(-45));
-
-        TrajectoryActionBuilder toBasketMedium = drive.actionBuilder(mediumPose)
-// to basket from medium
-                .strafeTo(new Vector2d(-55, -55))
-                .turn(Math.toRadians(45));
-
-        TrajectoryActionBuilder toClose = drive.actionBuilder(basketPose)
-// to close sample from basket
-                .strafeTo(new Vector2d(-60, -24))
-                .turn(Math.toRadians(-45));
-
-        TrajectoryActionBuilder toBasketClose = drive.actionBuilder(closePose)
-// to basket from init
-                .strafeTo(new Vector2d(-55, -55))
-                .turn(Math.toRadians(45));
+//
+//        TrajectoryActionBuilder toFar = drive.actionBuilder(basketPose)
+//// to far sample from basket
+//                .strafeTo(new Vector2d(-36, -24))
+//                .turn(Math.toRadians(-45));
+//
+//        TrajectoryActionBuilder toBasketFar = drive.actionBuilder(farPose)
+//// to basket from far
+//                .strafeTo(new Vector2d(-55, -55))
+//                .turn(Math.toRadians(45));
+//
+//        TrajectoryActionBuilder toMedium = drive.actionBuilder(basketPose)
+//// to medium sample from basket
+//                .strafeTo(new Vector2d(-48, -24))
+//                .turn(Math.toRadians(-45));
+//
+//        TrajectoryActionBuilder toBasketMedium = drive.actionBuilder(mediumPose)
+//// to basket from medium
+//                .strafeTo(new Vector2d(-55, -55))
+//                .turn(Math.toRadians(45));
+//
+//        TrajectoryActionBuilder toClose = drive.actionBuilder(basketPose)
+//// to close sample from basket
+//                .strafeTo(new Vector2d(-60, -24))
+//                .turn(Math.toRadians(-45));
+//
+//        TrajectoryActionBuilder toBasketClose = drive.actionBuilder(closePose)
+//// to basket from init
+//                .strafeTo(new Vector2d(-55, -55))
+//                .turn(Math.toRadians(45));
 
         TrajectoryActionBuilder toBar = drive.actionBuilder(initialPoseRight)
 //                .strafeTo(new Vector2d(42, 0))
@@ -352,19 +350,18 @@ public class AutoBasketV2 extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        munch.closeMunch(),
                         arm.armUp(),
-                        pitch.upPitch(),
-//                        toBar.build(),
+                        //pitch.upPitch(),
+                        toBar.build()
 
-                        toBasketInit.build(),
-//// score in basket
-                        extension.extensionUp(),
-                        pitch.downPitch(),
-                        munch.openMunch(),
-                        extension.extensionDown()
+//                        toBasketInit.build(),
+// score in basket
+//                        extension.extensionUp(),
+//                        pitch.downPitch(),
+//                        munch.openMunch(),
+//                        extension.extensionDown()
 
-//                        toFar.build()
+//                        toFar.build(),
 //// intake far sample
 //                        pitch.downPitch(),
 //                        arm.armDown(),
@@ -372,7 +369,7 @@ public class AutoBasketV2 extends LinearOpMode {
 //                        arm.armUp(),
 //                        pitch.upPitch(),
 //
-//                        toBasketFar.build()
+//                        toBasketFar.build(),
 //
 ////// score far in basket
 //                        extension.extensionUp(),

@@ -47,9 +47,9 @@ public class TeleOpROSE extends LinearOpMode {
     public DcMotor  rightBack   = null;
     public DcMotor  arm = null;
     public DcMotor  extension  = null;
-    public Servo Pitch   = null;
+    public Servo pitch   = null;
     public Servo munch   = null;
-    public Servo Yaw     = null;
+    public Servo yaw     = null;
 
     double pitchOffset = -1;
     double munchOffset = -1;
@@ -93,12 +93,12 @@ public class TeleOpROSE extends LinearOpMode {
 
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        Pitch  = hardwareMap.get(Servo.class, "Pitch");
-        //Pitch.setPosition(1);
+        pitch  = hardwareMap.get(Servo.class, "pitch");
+        //pitch.setPosition(1);
         munch  = hardwareMap.get(Servo.class, "munch");
         //Munch.setPosition(0);
-        Yaw  = hardwareMap.get(Servo.class, "Yaw");
-        //Yaw.setPosition(1.5);
+        yaw  = hardwareMap.get(Servo.class, "yaw");
+        //yaw.setPosition(1.5);
 
         telemetry.addData(">", "Robot Ready.  Press START.");
         telemetry.update();
@@ -220,13 +220,13 @@ public class TeleOpROSE extends LinearOpMode {
             yawOffset += (gamepad2.left_trigger - gamepad2.right_trigger)/100;
 
             yawOffset = Range.clip(yawOffset, 0.6, 0.93);
-            Yaw.setPosition(yawOffset);
+            yaw.setPosition(yawOffset);
 
 //Pitch - left (left bumper), right (right bumpers)--------------------------
             pitchOffset += (gamepad1.left_trigger - gamepad1.right_trigger)/100;
 
             pitchOffset = Range.clip(pitchOffset, 0.25, 2);
-            Pitch.setPosition(pitchOffset);
+            pitch.setPosition(pitchOffset);
 
 
 // Send telemetry message to signify robot running;
